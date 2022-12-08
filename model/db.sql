@@ -14,7 +14,7 @@ CREATE TABLE `users` (
   `Username` varchar(20) NOT NULL,
   `Password` varchar(60) NOT NULL,
   `Email` varchar(50) NOT NULL, 
-  `ProfilePic` varchar(100) NOT NULL,
+  `ProfilePic` BLOB NOT NULL, /*varchar(100)*/
   `DisplayName` varchar(20) NOT NULL, 
   `Bio` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`Username`)
@@ -35,7 +35,7 @@ CREATE TABLE `user_posts` (
   `PostID` int NOT NULL AUTO_INCREMENT,   
   `Title` varchar(30) NOT NULL,  
   `Username` varchar(20) NOT NULL,   
-  `Photo` varchar(100) NOT NULL,   
+  `Photo` BLOB NOT NULL, /*varchar(100)*/
   `Date` DATE NOT NULL,
   `Tags` varchar(50) DEFAULT NULL,
   `Caption` varchar(280) DEFAULT NULL,   
