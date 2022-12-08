@@ -87,7 +87,7 @@ function picKey() {
 
 /* GET index.ejs */
 app.get("/", function(req, res){
-    let select_posts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.username = u.username ORDER BY p.postID DESC;";
+    let select_posts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.username = u.username ORDER BY p.postID DESC;";
     let query = db.query(select_posts, (err, rows) => {
         if (err) throw err;
         res.render("index", {
@@ -99,7 +99,7 @@ app.get("/", function(req, res){
 
 /* POST index.ejs - for after login */
 app.post("/", function(req, res){
-    let check = "SELECT * FROM users WHERE username = '" + req.body.username + "'";
+    let check = "SELECT * FROM Users WHERE username = '" + req.body.username + "'";
     var query = db.query(check, (err, results) => {
         if(err) throw err;
         if(results.length == 1){ //username exist
@@ -124,7 +124,7 @@ app.get("/about", function(req, res){
 
 /* search.ejs */
 app.get("/search", function(req, res){
-    let search = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.username = u.username AND p.username LIKE '%" + req.query.q + "%' OR p.title LIKE '%" + req.query.q + "%' OR p.tags LIKE '%" + req.query.q + "%' ORDER BY p.postID DESC";
+    let search = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.username = u.username AND p.username LIKE '%" + req.query.q + "%' OR p.title LIKE '%" + req.query.q + "%' OR p.tags LIKE '%" + req.query.q + "%' ORDER BY p.postID DESC";
     let query = db.query(search, (err, rows) => {
         if (err) throw err;
         res.render("search", {
@@ -142,7 +142,7 @@ app.get("/login", function(req, res){
 
 /* POST login.ejs - for after register */
 app.post("/login", function(req, res){
-    let check = "SELECT * FROM users WHERE username = '" + req.body.username + "' OR email = '" + req.body.email + "'";
+    let check = "SELECT * FROM Users WHERE username = '" + req.body.username + "' OR email = '" + req.body.email + "'";
     var query1 = db.query(check, (err, results) => {
         if(err) throw err;
         if(results.length == 0){ //no duplicates
@@ -175,14 +175,14 @@ app.get("/logout", function(req, res){
 
 /* GET profile.ejs */
 app.get("/profile/:username", function(req, res){
-    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM users u WHERE u.username = '" + req.params.username + "'";
+    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM Users u WHERE u.username = '" + req.params.username + "'";
     var user;
     let query1 = db.query(get_userprofile, (err, result) => {
         if (err) throw err;
         user = result[0];
     }); 
 
-    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, p.likecount, p.bookmarkcount, p.commentcount FROM user_posts p WHERE p.username = '" + req.params.username + "' ORDER BY p.postID DESC";
+    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, p.likecount, p.bookmarkcount, p.commentcount FROM User_Posts p WHERE p.username = '" + req.params.username + "' ORDER BY p.postID DESC";
     let query2 = db.query(get_userposts, (err, rows) => {
         if (err) throw err;
         res.render("profile", {
@@ -196,7 +196,7 @@ app.get("/profile/:username", function(req, res){
 /* POST profile.ejs - for after edit-profile */
 app.post("/profile/:username", function(req, res){
     //sql statements
-    let get_user = "SELECT * FROM users WHERE username = '" + req.session.username + "'";
+    let get_user = "SELECT * FROM Users WHERE username = '" + req.session.username + "'";
 
     //check if no file
     if (!req.files || Object.keys(req.files).length === 0){
