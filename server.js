@@ -398,7 +398,7 @@ app.get("/bookmarks", function(req, res){
 
 /* GET view-post.ejs */
 app.get("/post/:username/:postID-:title", function(req, res){
-    let get_post = "SELECT p.*, u.profilepic FROM User_Posts p JOIN users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
+    let get_post = "SELECT p.*, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
     var upost, like, bookmark;
     let query1 = db.query(get_post, (err, result) => {
         if (err) throw err;
