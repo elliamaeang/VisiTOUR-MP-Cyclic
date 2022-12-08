@@ -87,7 +87,7 @@ function picKey() {
 
 /* GET index.ejs */
 app.get("/", function(req, res){
-    let select_posts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.username = u.username ORDER BY p.postID DESC;";
+    let select_posts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.username = u.username ORDER BY p.postID DESC;";
     let query = db.query(select_posts, (err, rows) => {
         if (err) throw err;
         res.render("index", {
@@ -99,7 +99,7 @@ app.get("/", function(req, res){
 
 /* POST index.ejs - for after login */
 app.post("/", function(req, res){
-    let check = "SELECT * FROM Users WHERE username = '" + req.body.username + "'";
+    let check = "SELECT * FROM users WHERE username = '" + req.body.username + "'";
     var query = db.query(check, (err, results) => {
         if(err) throw err;
         if(results.length == 1){ //username exist
@@ -124,7 +124,7 @@ app.get("/about", function(req, res){
 
 /* search.ejs */
 app.get("/search", function(req, res){
-    let search = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.username = u.username AND p.username LIKE '%" + req.query.q + "%' OR p.title LIKE '%" + req.query.q + "%' OR p.tags LIKE '%" + req.query.q + "%' ORDER BY p.postID DESC";
+    let search = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.username = u.username AND p.username LIKE '%" + req.query.q + "%' OR p.title LIKE '%" + req.query.q + "%' OR p.tags LIKE '%" + req.query.q + "%' ORDER BY p.postID DESC";
     let query = db.query(search, (err, rows) => {
         if (err) throw err;
         res.render("search", {
@@ -142,7 +142,7 @@ app.get("/login", function(req, res){
 
 /* POST login.ejs - for after register */
 app.post("/login", function(req, res){
-    let check = "SELECT * FROM Users WHERE username = '" + req.body.username + "' OR email = '" + req.body.email + "'";
+    let check = "SELECT * FROM users WHERE username = '" + req.body.username + "' OR email = '" + req.body.email + "'";
     var query1 = db.query(check, (err, results) => {
         if(err) throw err;
         if(results.length == 0){ //no duplicates
@@ -175,14 +175,14 @@ app.get("/logout", function(req, res){
 
 /* GET profile.ejs */
 app.get("/profile/:username", function(req, res){
-    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM Users u WHERE u.username = '" + req.params.username + "'";
+    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM users u WHERE u.username = '" + req.params.username + "'";
     var user;
     let query1 = db.query(get_userprofile, (err, result) => {
         if (err) throw err;
         user = result[0];
     }); 
 
-    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, p.likecount, p.bookmarkcount, p.commentcount FROM User_Posts p WHERE p.username = '" + req.params.username + "' ORDER BY p.postID DESC";
+    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, p.likecount, p.bookmarkcount, p.commentcount FROM user_posts p WHERE p.username = '" + req.params.username + "' ORDER BY p.postID DESC";
     let query2 = db.query(get_userposts, (err, rows) => {
         if (err) throw err;
         res.render("profile", {
@@ -196,7 +196,7 @@ app.get("/profile/:username", function(req, res){
 /* POST profile.ejs - for after edit-profile */
 app.post("/profile/:username", function(req, res){
     //sql statements
-    let get_user = "SELECT * FROM Users WHERE username = '" + req.session.username + "'";
+    let get_user = "SELECT * FROM users WHERE username = '" + req.session.username + "'";
 
     //check if no file
     if (!req.files || Object.keys(req.files).length === 0){
@@ -227,7 +227,7 @@ app.post("/profile/:username", function(req, res){
         photo.mv(fpath, function(err){ if (err) return res.status(500).send(err); });
         
         //update profile picture
-        let update_icon = "UPDATE Users SET ProfilePic = '/images/icons/" + fname + "' WHERE Username = '" + req.session.username + "'";
+        let update_icon = "UPDATE users SET ProfilePic = '/images/icons/" + fname + "' WHERE Username = '" + req.session.username + "'";
         let queryui = db.query(update_icon, (err) => { if (err) throw err; });
     }
 
@@ -235,7 +235,7 @@ app.post("/profile/:username", function(req, res){
     if (req.body.pwd.length == 0){
     }else{
         let hash = bcrypt.hashSync(req.body.pwd, 10); //encrypt password
-        let update_pwd = "UPDATE Users SET Password = '" + hash + "' WHERE Username = '" + req.session.username + "'";
+        let update_pwd = "UPDATE users SET Password = '" + hash + "' WHERE Username = '" + req.session.username + "'";
         let queryup = db.query(update_pwd, (err) => { if (err) throw err; });
     }
 
@@ -245,7 +245,7 @@ app.post("/profile/:username", function(req, res){
         if(result[0].Email == req.body.email){
         }else{
             //check if email exists
-            let get_email = "SELECT * FROM Users WHERE email = '" + result[0].Email + "'";
+            let get_email = "SELECT * FROM users WHERE email = '" + result[0].Email + "'";
             let queryge = db.query(get_email, (err, email) => { 
                 if (err) throw err; 
                 if(email[0].length != 0){
@@ -253,7 +253,7 @@ app.post("/profile/:username", function(req, res){
                     return res.redirect("/profile/" + req.session.username + "?error=" + encodeURIComponent('email-already-used'));
                 }
                 console.log("email does not exist")
-                let update_email = "UPDATE Users SET Email = '" + req.body.email + "' WHERE Username = '" + req.session.username + "'";
+                let update_email = "UPDATE users SET Email = '" + req.body.email + "' WHERE Username = '" + req.session.username + "'";
                 let queryue = db.query(update_email, (err) => { if (err) throw err; });
             });
         }
@@ -261,7 +261,7 @@ app.post("/profile/:username", function(req, res){
 
     //update other information
     let data = {DisplayName: req.body.displayname, Bio: req.body.bio};
-    let update_profile = "UPDATE Users SET ? WHERE Username = '" + req.session.username + "'";
+    let update_profile = "UPDATE users SET ? WHERE Username = '" + req.session.username + "'";
     let queryu = db.query(update_profile, data,(err) => {
         if (err) throw err;
         req.session.displayname = req.body.displayname; //change displayname in session
@@ -275,7 +275,7 @@ app.get("/profile/edit/:username", function(req, res){
         return res.redirect("/");
     }
 
-    let get_userprofile = "SELECT * FROM Users WHERE username = '" + req.params.username + "'";
+    let get_userprofile = "SELECT * FROM users WHERE username = '" + req.params.username + "'";
     let query = db.query(get_userprofile, (err, result) => {
         if (err) throw err;
         res.render("edit-profile", {
@@ -294,23 +294,23 @@ app.get("/profile/delete/:username", function(req, res){
     console.log("Deleting user: " + req.params.username);
 
     //sql statements
-    let get_comments = "SELECT * FROM Comments WHERE username = '" + req.params.username + "'";
-    let del_comments = "DELETE FROM Comments WHERE username = '" + req.params.username + "'";
-    let get_likes = "SELECT * FROM Likes WHERE username = '" + req.params.username + "'";
-    let del_likes = "DELETE FROM Likes WHERE username = '" + req.params.username + "'";
-    let get_bookmarks = "SELECT * FROM User_Bookmarks WHERE username = '" + req.params.username + "'";
-    let del_bookmarks = "DELETE FROM User_Bookmarks WHERE username = '" + req.params.username + "'";
-    let get_posts = "SELECT * FROM User_Posts WHERE username = '" + req.params.username + "'";
-    let del_posts = "DELETE FROM User_Posts WHERE username = '" + req.params.username + "'";
-    let get_profile = "SELECT * FROM Users WHERE username = '" + req.params.username + "'";
-    let del_profile = "DELETE FROM Users WHERE username = '" + req.params.username + "'";
+    let get_comments = "SELECT * FROM comments WHERE username = '" + req.params.username + "'";
+    let del_comments = "DELETE FROM comments WHERE username = '" + req.params.username + "'";
+    let get_likes = "SELECT * FROM likes WHERE username = '" + req.params.username + "'";
+    let del_likes = "DELETE FROM likes WHERE username = '" + req.params.username + "'";
+    let get_bookmarks = "SELECT * FROM user_bookmarks WHERE username = '" + req.params.username + "'";
+    let del_bookmarks = "DELETE FROM user_bookmarks WHERE username = '" + req.params.username + "'";
+    let get_posts = "SELECT * FROM user_posts WHERE username = '" + req.params.username + "'";
+    let del_posts = "DELETE FROM user_posts WHERE username = '" + req.params.username + "'";
+    let get_profile = "SELECT * FROM users WHERE username = '" + req.params.username + "'";
+    let del_profile = "DELETE FROM users WHERE username = '" + req.params.username + "'";
 
     //delete all comments made by user
     let queryc1 = db.query(get_comments, (err, rows) => {
         if (err) throw err;
         rows.forEach(function(row){
             //update post statistics of affected posts
-            let update_comments = "UPDATE `User_Posts` SET CommentCount = CommentCount-1 WHERE PostID = " + row.PostID;
+            let update_comments = "UPDATE `user_posts` SET CommentCount = CommentCount-1 WHERE PostID = " + row.PostID;
             let queryc2 = db.query(update_comments, (err) => { if (err) throw err; });
         });
         let queryc3 = db.query(del_comments, (err) => {
@@ -324,7 +324,7 @@ app.get("/profile/delete/:username", function(req, res){
         if (err) throw err;
         rows.forEach(function(row){
             //update post statistics of affected posts
-            let update_likes = "UPDATE `User_Posts` SET LikeCount = LikeCount-1 WHERE PostID = " + row.PostID;
+            let update_likes = "UPDATE `user_posts` SET LikeCount = LikeCount-1 WHERE PostID = " + row.PostID;
             let queryl2 = db.query(update_likes, (err) => { if (err) throw err; });
         });
         let queryl3 = db.query(del_likes, (err) => {
@@ -338,7 +338,7 @@ app.get("/profile/delete/:username", function(req, res){
         if (err) throw err;
         rows.forEach(function(row){
             //update post statistics of affected posts
-            let update_bookmarks = "UPDATE `User_Posts` SET BookmarkCount = BookmarkCount-1 WHERE PostID = " + row.PostID;
+            let update_bookmarks = "UPDATE `user_posts` SET BookmarkCount = BookmarkCount-1 WHERE PostID = " + row.PostID;
             let queryl2 = db.query(update_bookmarks, (err) => { if (err) throw err; });
         });
         let queryb3 = db.query(del_bookmarks, (err) => {
@@ -352,9 +352,9 @@ app.get("/profile/delete/:username", function(req, res){
         if (err) throw err;
         rows.forEach(function(row){
             //delete all comments, likes, and bookmarks made on the post
-            let del_pcomments = "DELETE FROM Comments WHERE PostID = " + row.PostID;
-            let del_plikes = "DELETE FROM Likes WHERE PostID = " + row.PostID;
-            let del_pbookmarks = "DELETE FROM User_Bookmarks WHERE PostID = " + row.PostID;
+            let del_pcomments = "DELETE FROM comments WHERE PostID = " + row.PostID;
+            let del_plikes = "DELETE FROM likes WHERE PostID = " + row.PostID;
+            let del_pbookmarks = "DELETE FROM user_bookmarks WHERE PostID = " + row.PostID;
             let queryp2 = db.query(del_pcomments, (err) => { if (err) throw err; });
             let queryp3 = db.query(del_plikes, (err) => { if (err) throw err; });
             let queryp4 = db.query(del_pbookmarks, (err) => { if (err) throw err; });
@@ -386,7 +386,7 @@ app.get("/bookmarks", function(req, res){
         return res.redirect("/");
     }
 
-    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username JOIN user_bookmarks b on p.postID = b.postID WHERE b.username = '" + req.session.username + "' AND b.postID = p.postID ORDER BY p.postID DESC;";
+    let get_userposts = "SELECT p.postID, p.username, p.title, p.photo, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username JOIN user_bookmarks b on p.postID = b.postID WHERE b.username = '" + req.session.username + "' AND b.postID = p.postID ORDER BY p.postID DESC;";
     let query = db.query(get_userposts, (err, rows) => {
         if (err) throw err;
         res.render("bookmarks", {
@@ -398,7 +398,7 @@ app.get("/bookmarks", function(req, res){
 
 /* GET view-post.ejs */
 app.get("/post/:username/:postID-:title", function(req, res){
-    let get_post = "SELECT p.*, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
+    let get_post = "SELECT p.*, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
     var upost, like, bookmark;
     let query1 = db.query(get_post, (err, result) => {
         if (err) throw err;
@@ -407,7 +407,7 @@ app.get("/post/:username/:postID-:title", function(req, res){
 
     if(req.session.isAuth){
         //check if post is liked
-        let check_likes = "SELECT * FROM Likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+        let check_likes = "SELECT * FROM likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
         let queryl = db.query(check_likes, (err, result) => {
             if (err) throw err;
             if(result.length == 1){ //liked
@@ -418,7 +418,7 @@ app.get("/post/:username/:postID-:title", function(req, res){
         });
 
         //check if post is bookmarked
-        let check_bookmarks = "SELECT * FROM User_Bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+        let check_bookmarks = "SELECT * FROM user_bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
         let queryb = db.query(check_bookmarks, (err, result) => {
             if (err) throw err;
             if(result.length == 1){ //bookmarked
@@ -429,7 +429,7 @@ app.get("/post/:username/:postID-:title", function(req, res){
         });
     }
     
-    let get_comments = "SELECT c.*, u.profilepic FROM Comments c JOIN Users u ON c.username = u.username WHERE c.postID = '" + req.params.postID + "' ORDER BY c.commentID DESC;";
+    let get_comments = "SELECT c.*, u.profilepic FROM comments c JOIN users u ON c.username = u.username WHERE c.postID = '" + req.params.postID + "' ORDER BY c.commentID DESC;";
     let query2 = db.query(get_comments, (err, rows) => {
         if (err) throw err;
         res.render("view-post", {
@@ -450,7 +450,7 @@ app.post("/post/:username/:postID-:title", function(req, res){
     }
     
     let data = {Caption: req.body.caption, Tags: req.body.tags, Title: req.body.location};
-    let update_post = "UPDATE User_Posts SET ? WHERE postID = " + req.params.postID;
+    let update_post = "UPDATE user_posts SET ? WHERE postID = " + req.params.postID;
     let query = db.query(update_post, data,(err) => {
         if(err) throw err;
         res.redirect("/post/" + req.params.username + "/" + req.params.postID + "-" + req.params.title);
@@ -463,7 +463,7 @@ app.get("/create-post", function(req, res){
         return res.redirect("/");
     }
 
-    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM Users u WHERE u.username = '" + req.session.username + "'";
+    let get_userprofile = "SELECT u.username, u.profilepic, u.displayname, u.bio FROM users u WHERE u.username = '" + req.session.username + "'";
     var user;
     let query1 = db.query(get_userprofile, (err, result) => {
         if (err) throw err;
@@ -507,7 +507,7 @@ app.post("/create-post", function(req, res){
     //add to database
     var file = "/images/posts/" + fname;
     let data = {Title: title, Username: req.session.username, Photo: file, Date: today, Tags: tags, Caption: caption};
-    let upload = "INSERT INTO User_Posts SET ?";
+    let upload = "INSERT INTO user_posts SET ?";
     let query = db.query(upload, data,(err) => {
         if(err) throw err;
         console.log("Post upload successful");
@@ -521,7 +521,7 @@ app.get("/post/edit/:username/:postID-:title", function(req, res){
         return res.redirect("/");
     }
 
-    let get_post = "SELECT p.*, u.profilepic FROM User_Posts p JOIN Users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
+    let get_post = "SELECT p.*, u.profilepic FROM user_posts p JOIN users u ON p.username = u.username WHERE p.postID = '" + req.params.postID + "';";
     let query1 = db.query(get_post, (err, result) => {
         if (err) throw err;
         res.render("edit-post", {
@@ -540,11 +540,11 @@ app.get("/post/delete/:username/:postID-:title", function(req, res){
     console.log("Deleting post: " + req.params.postID + "-" + req.params.username);
 
     //sql statements
-    let del_comments = "DELETE FROM Comments WHERE postID = " + req.params.postID;
-    let del_likes = "DELETE FROM Likes WHERE postID = " + req.params.postID;
-    let del_bookmarks = "DELETE FROM User_Bookmarks WHERE postID = " + req.params.postID;
-    let get_post = "SELECT * FROM User_Posts WHERE postID = " + req.params.postID;
-    let del_post = "DELETE FROM User_Posts WHERE postID = " + req.params.postID;
+    let del_comments = "DELETE FROM comments WHERE postID = " + req.params.postID;
+    let del_likes = "DELETE FROM likes WHERE postID = " + req.params.postID;
+    let del_bookmarks = "DELETE FROM user_bookmarks WHERE postID = " + req.params.postID;
+    let get_post = "SELECT * FROM user_posts WHERE postID = " + req.params.postID;
+    let del_post = "DELETE FROM user_posts WHERE postID = " + req.params.postID;
 
     //delete comments associated with post
     let queryc = db.query(del_comments, (err) => {
@@ -582,10 +582,10 @@ app.get("/post/delete/:username/:postID-:title", function(req, res){
 /* for add-comment */
 app.post("/post/comment/:username/:postID-:title", function(req,res){
     let data = {PostID: req.params.postID, Username: req.session.username, Comment: req.body.comment, Date: today};
-    let add_comment = "INSERT INTO `Comments` SET ?";
+    let add_comment = "INSERT INTO `comments` SET ?";
     let query1 = db.query(add_comment, data,(err) => {
         if(err) throw err;
-        let inc_commentcount = "UPDATE `User_Posts` SET CommentCount = CommentCount+1 WHERE PostID = '" + req.params.postID + "'";
+        let inc_commentcount = "UPDATE `user_posts` SET CommentCount = CommentCount+1 WHERE PostID = '" + req.params.postID + "'";
         let query2 = db.query(inc_commentcount, (err, result) => { //increment comment count
             if (err) throw err;
             res.redirect("/post/" + req.params.username + "/" + req.params.postID + "-" + req.params.title);
@@ -599,10 +599,10 @@ app.get("/post/:username/:postID-:title/comment/:commentID/delete", function(req
         return res.redirect("/");
     }
 
-    let del_comment = "DELETE FROM `Comments` WHERE CommentID = " + req.params.commentID;
+    let del_comment = "DELETE FROM `comments` WHERE CommentID = " + req.params.commentID;
     let query1 = db.query(del_comment,(err) => {
         if(err) throw err;
-        let dec_commentcount = "UPDATE `User_Posts` SET CommentCount = CommentCount-1 WHERE PostID = '" + req.params.postID + "'";
+        let dec_commentcount = "UPDATE `user_posts` SET CommentCount = CommentCount-1 WHERE PostID = '" + req.params.postID + "'";
         let query2 = db.query(dec_commentcount, (err) => { //decrement comment count
             if (err) throw err;
             res.redirect("/post/" + req.params.username + "/" + req.params.postID + "-" + req.params.title);
@@ -617,25 +617,25 @@ app.get("/post/like/:username/:postID-:title", function(req,res){
     }
 
     //check if post is liked
-    let check_likes = "SELECT * FROM Likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+    let check_likes = "SELECT * FROM likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
     let query = db.query(check_likes, (err, result) => {
         if (err) throw err;
         if(result.length == 0){ //not liked
             //like post
-            let like = "INSERT INTO Likes SET username = '" + req.session.username + "', postID = " + req.params.postID;
+            let like = "INSERT INTO likes SET username = '" + req.session.username + "', postID = " + req.params.postID;
             let queryl = db.query(like, (err) => { 
                 if (err) throw err; 
                 //increment like count
-                let inc_lcount = "UPDATE `User_Posts` SET LikeCount = LikeCount+1 WHERE PostID = " + req.params.postID;
+                let inc_lcount = "UPDATE `user_posts` SET LikeCount = LikeCount+1 WHERE PostID = " + req.params.postID;
                 let queryil = db.query(inc_lcount, (err) => { if (err) throw err; });
             });
         }else{ //liked
             //unlike post
-            let del_like = "DELETE FROM Likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+            let del_like = "DELETE FROM likes WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
             let queryul = db.query(del_like, (err) => { 
                 if (err) throw err; 
                 //decrement like count
-                let dec_lcount = "UPDATE `User_Posts` SET LikeCount = LikeCount-1 WHERE PostID = " + req.params.postID;
+                let dec_lcount = "UPDATE `user_posts` SET LikeCount = LikeCount-1 WHERE PostID = " + req.params.postID;
                 let querydl = db.query(dec_lcount, (err) => { if (err) throw err; });
             });
         }
@@ -650,25 +650,25 @@ app.get("/post/bookmark/:username/:postID-:title", function(req,res){
     }
     
     //check if post is bookmarked
-    let check_bookmarks = "SELECT * FROM User_Bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+    let check_bookmarks = "SELECT * FROM user_bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
     let query = db.query(check_bookmarks, (err, result) => {
         if (err) throw err;
         if(result.length == 0){ //not bookmarked
             //bookmark post
-            let bookmark = "INSERT INTO User_Bookmarks SET username = '" + req.session.username + "', postID = " + req.params.postID;
+            let bookmark = "INSERT INTO user_bookmarks SET username = '" + req.session.username + "', postID = " + req.params.postID;
             let queryb = db.query(bookmark, (err) => { 
                 if (err) throw err; 
                 //increment bookmark count
-                let inc_bcount = "UPDATE `User_Posts` SET BookmarkCount = BookmarkCount+1 WHERE PostID = " + req.params.postID;
+                let inc_bcount = "UPDATE `user_posts` SET BookmarkCount = BookmarkCount+1 WHERE PostID = " + req.params.postID;
                 let queryib = db.query(inc_bcount, (err) => { if (err) throw err; });
             });
         }else{ //bookmarked
             //unbookmark post
-            let del_bookmark = "DELETE FROM User_Bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
+            let del_bookmark = "DELETE FROM user_bookmarks WHERE username = '" + req.session.username + "' AND postID = " + req.params.postID;
             let queryub = db.query(del_bookmark, (err) => { 
                 if (err) throw err; 
                 //decrement bookmark count
-                let dec_bcount = "UPDATE `User_Posts` SET BookmarkCount = BookmarkCount-1 WHERE PostID = " + req.params.postID;
+                let dec_bcount = "UPDATE `user_posts` SET BookmarkCount = BookmarkCount-1 WHERE PostID = " + req.params.postID;
                 let querydb = db.query(dec_bcount, (err) => { if (err) throw err; });
             });
         }
