@@ -489,6 +489,7 @@ app.post("/create-post", function(req, res){
     
     //grab file
     let photo = req.files.photo;
+    console.log(photo);
 
     //check if valid extension
     const extensionName = path.extname(photo.name).toLowerCase(); // fetch the file extension
