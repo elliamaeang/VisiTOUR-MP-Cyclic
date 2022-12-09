@@ -66,7 +66,7 @@ If you received this application with an **existing dotenv file**:
 - CD to the application location
 - Type `npm install` in CMD to build the application
     - If you received this application with an existing node_modules folder, skip this step
-- Type `npm start` in CMD 
+- Type `npm start` in CMD to run the application
     - Alternative scripts:
         - `node server.js`
         - For developers:
