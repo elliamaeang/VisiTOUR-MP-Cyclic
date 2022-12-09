@@ -21,11 +21,11 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Note: All sample passwords are "password" in md5 hash*/
-INSERT INTO `users` VALUES ('brylil','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','brylil@gmail.com','/images/icons/user3.jpeg', 'Bryan', 'Asian traveller'),
-('elliamae','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','ellia@yahoo.com','/images/icons/user1.jpg','Ellia','Hello world! This is my bio'),
-('emman','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','emman@gmail.com','/images/icons/user4.jpg','Emman','Bon voyage!'),
-('alexis','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','alex23@hotmail.com','/images/icons/user2.jpeg','Alexis','I like photography'),
-('ccapdev','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','apdev@gmail.com','/images/icons/user5.jpg','Apdev','This is MP Phase 2.');
+INSERT INTO `users` VALUES ('brylil','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','brylil@gmail.com','user3.jpeg', 'Bryan', 'Asian traveller'),
+('elliamae','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','ellia@yahoo.com','user1.jpg','Ellia','Hello world! This is my bio'),
+('emman','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','emman@gmail.com','user4.jpg','Emman','Bon voyage!'),
+('alexis','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','alex23@hotmail.com','user2.jpeg','Alexis','I like photography'),
+('ccapdev','$2a$10$J8G9AUA6MAOBa4292wCI0OHV5hXAt5vUHZZLLeloyIBPZK/u2Y9aq','apdev@gmail.com','user5.jpg','Apdev','This is MP Phase 2.');
 
 LOCK TABLES `users` WRITE;
 
@@ -49,11 +49,11 @@ ALTER TABLE user_posts
 	ADD FOREIGN KEY (Username) REFERENCES users (Username);
 
 INSERT INTO `user_posts` (`Title`, `Username`, `Photo`, `Date`, `Tags`, `Caption`, `LikeCount`, `BookmarkCount`, `CommentCount`)
-VALUES ('Maldives','brylil','/images/posts/myPost1.jpg','2022-11-23','travel, photography, beach','Picture I took!','1','2','1'),
-('Philippines','elliamae','/images/posts/myPost2.jpg','2022-11-23','photography, beach','Look at this place!','1','2','2'),
-('Sweden','emman','/images/posts/myPost3.jpg','2022-11-23','travel','What a dazzling view','1','1','1'),
-('NYC','alexis','/images/posts/myPost4.jpeg','2022-11-23','photo, travel, city','New York City','1','0','0'),
-('Toronto','ccapdev','/images/posts/myPost5.jpeg','2022-11-23','city','I am now in Canada wow','1','0','1');
+VALUES ('Maldives','brylil','myPost1.jpg','2022-11-23','travel, photography, beach','Picture I took!','1','2','1'),
+('Philippines','elliamae','myPost2.jpg','2022-11-23','photography, beach','Look at this place!','1','2','2'),
+('Sweden','emman','myPost3.jpg','2022-11-23','travel','What a dazzling view','1','1','1'),
+('NYC','alexis','myPost4.jpeg','2022-11-23','photo, travel, city','New York City','1','0','0'),
+('Toronto','ccapdev','myPost5.jpeg','2022-11-23','city','I am now in Canada wow','1','0','1');
 
 LOCK TABLES `user_posts` WRITE;
 
