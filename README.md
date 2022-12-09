@@ -64,6 +64,8 @@ If you received this application with an **existing dotenv file**:
 - Execute the script (use the lightning button) to create the database
 - Open command prompt (CMD)
 - CD to the application location
+- Type `npm install` in CMD to build the application
+    - If you received this application with an existing node_modules folder, skip this step
 - Type `npm start` in CMD 
     - Alternative scripts:
         - `node server.js`
