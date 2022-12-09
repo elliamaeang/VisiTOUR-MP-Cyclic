@@ -35,7 +35,7 @@ CREATE TABLE `user_posts` (
   `PostID` int NOT NULL AUTO_INCREMENT,   
   `Title` varchar(30) NOT NULL,  
   `Username` varchar(20) NOT NULL,   
-  `Photo` varchar(100) NOT NULL,   
+  `Photo` varchar(100) NOT NULL,
   `Date` DATE NOT NULL,
   `Tags` varchar(50) DEFAULT NULL,
   `Caption` varchar(280) DEFAULT NULL,   

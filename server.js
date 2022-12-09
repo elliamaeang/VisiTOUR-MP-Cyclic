@@ -12,6 +12,7 @@ const MySQLStore = require("express-mysql-session")(session);
 const fileUpload = require("express-fileupload");
 const path = require("path");
 const fs = require("fs");
+const { Storage } = require("@google-cloud/storage");
 
 //Database
 const db = mysql.createConnection({
@@ -45,6 +46,16 @@ const sessionStore = new MySQLStore({
 		}
 	}
 },db);
+
+//Cloud Storage
+let projectId = "inspired-truth-371105";
+let keyFilename = "cloudkey.json";
+let bucketName = "visitour-mp-bucket"
+const storage = new Storage({
+    projectId,
+    keyFilename
+})
+const bucket = storage.bucket(bucketName);
 
 //App
 const app = express();
@@ -81,6 +92,12 @@ function picKey() {
         key += chars.charAt(Math.floor(Math.random() * chars_length));
     }
     return key;
+}
+
+//Delete (for image uploads)
+function deleteFile(fileName) {
+    bucket.file(fileName).delete();
+    console.log(`gs://${bucket.name}/${fileName} deleted`);
 }
 
 //URL Routing
@@ -147,7 +164,7 @@ app.post("/login", function(req, res){
         if(err) throw err;
         if(results.length == 0){ //no duplicates
             let hash = bcrypt.hashSync(req.body.pwd, 10); //encrypt password
-            let pfp = '/images/icons/icon.jpg' //default profile picture
+            let pfp = 'icon.jpg' //default profile picture
             let data = {Username: req.body.username, Password: hash, Email: req.body.email, ProfilePic: pfp, DisplayName: req.body.username, Bio: null};
             let insertuser = "INSERT INTO users SET ?";
             let query2 = db.query(insertuser, data,(err) => {
@@ -205,29 +222,32 @@ app.post("/profile/:username", function(req, res){
         let photo = req.files.profilepic;
 
         //check if valid extension
-        const extensionName = path.extname(photo.name).toLowerCase(); // fetch the file extension
-        const allowedExtension = ['.png','.jpg','.jpeg'];
-        if(!allowedExtension.includes(extensionName)){ //invalid file
+        if(!photo.mimetype.startsWith("image")){ //invalid file
             return res.status(422).redirect("/profile/" + req.session.username + "?error=" + encodeURIComponent('invalid-icon'));
         }
 
         //delete old icon
         let querygi = db.query(get_user, (err, result) => {
             if (err) throw err;
-            if (result[0].ProfilePic != "/images/icons/icon.jpg"){
-                fs.unlink(__dirname + "/public/" + result[0].ProfilePic, (err) => { if (err) throw err; }); //delete profile picture file
+            if (result[0].ProfilePic != "icon.jpg"){
+                deleteFile(result[0].ProfilePic); //delete profile picture file
             }
         });
 
         //rename file
+        const extensionName = path.extname(photo.name).toLowerCase(); // fetch the file extension
         let fname = req.session.username + extensionName;
-        let fpath = __dirname + "/public/images/icons/" + fname;
         
-        //move file to desired position
-        photo.mv(fpath, function(err){ if (err) return res.status(500).send(err); });
-        
+        //convert to blob and upload to cloud
+        const blob = bucket.file(fname);
+        const blobStream = blob.createWriteStream();
+        blobStream.on("finish", () => {
+            console.log("blobStream success");
+        });
+        blobStream.end(req.files.profilepic.data);
+
         //update profile picture
-        let update_icon = "UPDATE users SET ProfilePic = '/images/icons/" + fname + "' WHERE Username = '" + req.session.username + "'";
+        let update_icon = "UPDATE users SET ProfilePic = '" + fname + "' WHERE Username = '" + req.session.username + "'";
         let queryui = db.query(update_icon, (err) => { if (err) throw err; });
     }
 
@@ -358,7 +378,7 @@ app.get("/profile/delete/:username", function(req, res){
             let queryp2 = db.query(del_pcomments, (err) => { if (err) throw err; });
             let queryp3 = db.query(del_plikes, (err) => { if (err) throw err; });
             let queryp4 = db.query(del_pbookmarks, (err) => { if (err) throw err; });
-            fs.unlink(__dirname + "/public/" + row.Photo, (err) => { if (err) throw err; }); //delete photo file
+            deleteFile(row.Photo); //delete photo file
         });
         let queryp5 = db.query(del_posts, (err) => {
             if (err) throw err;
@@ -367,8 +387,8 @@ app.get("/profile/delete/:username", function(req, res){
             //delete user
             let queryu1 = db.query(get_profile, (err, result) => {
                 if (err) throw err;
-                if (result[0].ProfilePic != "/images/icons/icon.jpg"){
-                    fs.unlink(__dirname + "/public/" + result[0].ProfilePic, (err) => { if (err) throw err; }); //delete profile picture file
+                if (result[0].ProfilePic != "icon.jpg"){
+                    deleteFile(result[0].ProfilePic); //delete profile picture file
                 }
                 let queryu2 = db.query(del_profile, (err) => {
                     if (err) throw err;
@@ -492,22 +512,25 @@ app.post("/create-post", function(req, res){
     console.log(photo);
 
     //check if valid extension
-    const extensionName = path.extname(photo.name).toLowerCase(); // fetch the file extension
-    const allowedExtension = ['.png','.jpg','.jpeg'];
-    if(!allowedExtension.includes(extensionName)){ //invalid file
+    if(!photo.mimetype.startsWith("image")){ //invalid file
         return res.status(422).redirect("/create-post?error=" + encodeURIComponent('invalid'));
     }
 
     //rename file
+    const extensionName = path.extname(photo.name).toLowerCase(); // fetch the file extension
     let fname = req.session.username + "-" + title + "-" + picKey() + extensionName;
-    let fpath = __dirname + "/public/images/posts/" + fname;
-    
-    //move file to desired position
-    photo.mv(fpath, function(err){ if (err) return res.status(500).send(err); });
+    //let fpath = __dirname + "/public/images/posts/" + fname;
+
+    //convert to blob and upload to cloud
+    const blob = bucket.file(fname);
+    const blobStream = blob.createWriteStream();
+    blobStream.on("finish", () => {
+        console.log("blobStream success");
+    });
+    blobStream.end(req.files.photo.data);
 
     //add to database
-    var file = "/images/posts/" + fname;
-    let data = {Title: title, Username: req.session.username, Photo: file, Date: today, Tags: tags, Caption: caption};
+    let data = {Title: title, Username: req.session.username, Photo: fname, Date: today, Tags: tags, Caption: caption};
     let upload = "INSERT INTO user_posts SET ?";
     let query = db.query(upload, data,(err) => {
         if(err) throw err;
@@ -568,13 +591,10 @@ app.get("/post/delete/:username/:postID-:title", function(req, res){
     //delete post
     let queryp1 = db.query(get_post, (err, result) => {
         if (err) throw err;
-        fs.unlink(__dirname + "/public/" + result[0].Photo, (err) => { //delete photo file
-            if (err) throw err;
-            console.log("Step 4 complete: Photo deleted");
-        });
+        deleteFile(result[0].Photo); //delete photo file
         let query2 = db.query(del_post, (err) => {
             if (err) throw err;
-            console.log("Step 5 complete: Post deleted");
+            console.log("Step 4 complete: Post deleted");
             res.redirect("/profile/" + req.params.username);
         });
     });
