@@ -56,7 +56,7 @@ If you **do not** yet have a dotenv file, follow these steps:
         - For local deployment, you may move the .json file to the root of the directory and assign the filename to this variable.
     - `GC_BUCKET`: The name of the Google Cloud Storage bucket.
 
-If you already have a dotenv file:
+If you received this application with an **existing dotenv file**:
 - ***Important:*** The Google Cloud Storage bucket associated to this application is the same bucket used by the deployed website. Be careful when **modifying or deleting existing sample data entries**, as these will affect the live site.
 
 ### Instructions:
