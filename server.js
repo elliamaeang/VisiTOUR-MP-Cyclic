@@ -48,9 +48,9 @@ const sessionStore = new MySQLStore({
 },db);
 
 //Cloud Storage
-let projectId = "inspired-truth-371105";
-let keyFilename = "cloudkey.json";
-let bucketName = "visitour-mp-bucket"
+let projectId = process.env.GC_PROJID;
+let keyFilename = process.env.GC_KEY;
+let bucketName = process.env.GC_BUCKET;
 const storage = new Storage({
     projectId,
     keyFilename
